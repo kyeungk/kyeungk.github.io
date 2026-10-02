@@ -1,0 +1,1 @@
+# public_guard allowlist: "<path substring>  <regex>" per line (two spaces). Keep rules narrow.
