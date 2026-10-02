@@ -1,0 +1,50 @@
+# keithyeung.com (GitHub Pages) CI.  Everything in this repo is public the moment
+# it reaches main, so every PR and push runs the public-site guard (personal /
+# financial data, GPS, coordinates near a home) and a secret scan.
+# Public repo: Actions minutes are free.
+#
+# Turn on branch protection for main (Settings → Branches → require status checks
+# "public-site guard" and "secret scan") so the page cannot publish until these pass.
+
+name: checks
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  public-site:
+    name: public-site guard
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: scan the whole site
+        env:
+          PRIVACY_HOMES: ${{ secrets.PRIVACY_HOMES }}
+          PRIVACY_RADIUS_M: ${{ vars.PRIVACY_RADIUS_M || '250' }}
+        run: |
+          # The site is a handful of files, one of them 50 MB; scanning everything takes ~15 s.
+          python3 .github/scripts/public_guard.py --radius-m "$PRIVACY_RADIUS_M" \
+            $(git ls-files | grep -vE '^\.github/' )
+      - name: PRIVACY_HOMES secret missing?
+        if: ${{ secrets.PRIVACY_HOMES == '' }}
+        run: echo "::warning::Add repository secret PRIVACY_HOMES (lat,lon;lat,lon) so the home-proximity check runs."
+
+  secrets:
+    name: secret scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          filter: blob:none
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_ENABLE_UPLOAD_ARTIFACT: "false"
+          GITLEAKS_ENABLE_COMMENTS: "false"
