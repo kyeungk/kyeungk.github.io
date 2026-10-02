@@ -29,11 +29,10 @@ jobs:
           PRIVACY_RADIUS_M: ${{ vars.PRIVACY_RADIUS_M || '250' }}
         run: |
           # The site is a handful of files, one of them 50 MB; scanning everything takes ~15 s.
+          # public_guard.py prints a ::warning:: when PRIVACY_HOMES is unset (the secrets
+          # context cannot be used in a step `if`, so the script does the check itself).
           python3 .github/scripts/public_guard.py --radius-m "$PRIVACY_RADIUS_M" \
             $(git ls-files | grep -vE '^\.github/' )
-      - name: PRIVACY_HOMES secret missing?
-        if: ${{ secrets.PRIVACY_HOMES == '' }}
-        run: echo "::warning::Add repository secret PRIVACY_HOMES (lat,lon;lat,lon) so the home-proximity check runs."
 
   secrets:
     name: secret scan
