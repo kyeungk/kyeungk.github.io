@@ -12,6 +12,7 @@ on:
   pull_request:
   push:
     branches: [main]
+  workflow_dispatch:   # re-scan the whole site on demand (e.g. after PRIVACY_HOMES changes)
 
 permissions:
   contents: read
