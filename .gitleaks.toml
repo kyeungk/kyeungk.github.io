@@ -1,0 +1,16 @@
+# gitleaks config for keithyeung.com.  Default rules, plus one allowlist: the CARTO
+# basemap key.  It is a browser-side tile key that ships inside the public map page
+# by design (the same key is on kyrosidecar.com/travels); it is not a secret.
+# The private Life-Repo carries the identical allowlist line.  Approved by Keith 2026-11-24.
+
+title = "keithyeung.com gitleaks"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "CARTO basemap key in tile URLs (browser-side, public by design)"
+regexTarget = "line"
+regexes = [
+  '''basemaps\.cartocdn\.com/[^\s]*\?key=cb1_''',
+]
